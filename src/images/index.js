@@ -10,7 +10,6 @@
 
 module.exports = {
   data: require('./data'),
-  // resize: require('./resize'),
   sat: require('./sat'),
   ssat: require('./ssat'),
   sobel: require('./sobel'),

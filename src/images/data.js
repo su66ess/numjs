@@ -1,12 +1,6 @@
 'use strict';
 var path = require('path');
 
-// var DATA_DIR = path.join(path.resolve(__dirname), '../../data');
-
-// function getArray (fileName) {
-//   return read(path.join(DATA_DIR, fileName));
-// }
-
 var exports = {};
 
 /**
