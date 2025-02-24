@@ -7,7 +7,6 @@
     "test": "test"
   },
   "dependencies": {
-    "cwise": "^1.0.8",
     "deasync": "^0.1.21",
     "lodash": "^4.17.21",
     "ndarray": "^1.0.18",

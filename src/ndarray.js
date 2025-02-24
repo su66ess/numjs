@@ -1,7 +1,6 @@
 'use strict';
 
 var ndarray = require('ndarray');
-var cwise = require('cwise');
 var ops = require('ndarray-ops');
 var gemm = require('ndarray-gemm');
 var ndFFT = require('ndarray-fft');
@@ -19,7 +18,7 @@ var _ = require('./utils');
 * data-type object (dtype), one of which is associated with each NdArray.
 * @constructor
 */
-var NdArray = function NdArray () {
+var NdArray = function NdArray() {
   if (arguments.length === 1) {
     this.selection = arguments[0];
   } else if (arguments.length === 0) {
@@ -31,7 +30,7 @@ var NdArray = function NdArray () {
   * @property {Number} NdArray#size - Number of elements in the array.
   */
   Object.defineProperty(this, 'size', {
-    get: function () {
+    get: function() {
       return this.selection.size;
     }.bind(this)
   });
@@ -43,7 +42,7 @@ var NdArray = function NdArray () {
   * @readonly
   */
   Object.defineProperty(this, 'shape', {
-    get: function () {
+    get: function() {
       return this.selection.shape;
     }.bind(this)
   });
@@ -55,7 +54,7 @@ var NdArray = function NdArray () {
   * @readonly
   */
   Object.defineProperty(this, 'ndim', {
-    get: function () {
+    get: function() {
       return this.selection.shape.length;
     }.bind(this)
   });
@@ -67,10 +66,10 @@ var NdArray = function NdArray () {
   * @see {dtypes} for more information
   */
   Object.defineProperty(this, 'dtype', {
-    get: function () {
+    get: function() {
       return this.selection.dtype;
     }.bind(this),
-    set: function (dtype) {
+    set: function(dtype) {
       var T = _.getType(dtype);
       if (T !== _.getType(this.dtype)) {
         this.selection = ndarray(new T(this.selection.data), this.selection.shape, this.selection.stride, this.selection.offset);
@@ -85,13 +84,13 @@ var NdArray = function NdArray () {
   * @readonly
   */
   Object.defineProperty(this, 'T', {
-    get: function () {
+    get: function() {
       return this.transpose();
     }.bind(this)
   });
 };
 
-NdArray.prototype.get = function () {
+NdArray.prototype.get = function() {
   var n = arguments.length;
   for (var i = 0; i < n; i++) {
     if (arguments[i] < 0) {
@@ -101,11 +100,11 @@ NdArray.prototype.get = function () {
   return this.selection.get.apply(this.selection, arguments);
 };
 
-NdArray.prototype.set = function () {
+NdArray.prototype.set = function() {
   return this.selection.set.apply(this.selection, arguments);
 };
 
-NdArray.prototype.slice = function () {
+NdArray.prototype.slice = function() {
   var d = this.ndim;
   var hi = new Array(d);
   var lo = new Array(d);
@@ -161,7 +160,7 @@ arr.pick(1)
 arr.pick(null, 1)
 // array([  1,  5,  9, 13])
 */
-NdArray.prototype.pick = function (axis) {
+NdArray.prototype.pick = function(axis) {
   return new NdArray(this.selection.pick.apply(this.selection, arguments));
 };
 
@@ -181,7 +180,7 @@ arr.lo(1,1)
 //        [  9, 10, 11],
 //        [ 13, 14, 15]])
 */
-NdArray.prototype.lo = function () {
+NdArray.prototype.lo = function() {
   return new NdArray(this.selection.lo.apply(this.selection, arguments));
 };
 
@@ -208,11 +207,11 @@ arr.lo(1,1).hi(2,2)
 //        [ 9, 10]])
 
 */
-NdArray.prototype.hi = function () {
+NdArray.prototype.hi = function() {
   return new NdArray(this.selection.hi.apply(this.selection, arguments));
 };
 
-NdArray.prototype.step = function () {
+NdArray.prototype.step = function() {
   return new NdArray(this.selection.step.apply(this.selection, arguments));
 };
 
@@ -221,7 +220,7 @@ NdArray.prototype.step = function () {
 *
 * @returns {NdArray}
 */
-NdArray.prototype.flatten = function () {
+NdArray.prototype.flatten = function() {
   if (this.ndim === 1) { // already flattened
     return new NdArray(this.selection);
   }
@@ -238,7 +237,7 @@ NdArray.prototype.flatten = function () {
 * @param {Array|number} The new shape should be compatible with the original shape. If an integer, then the result will be a 1-D array of that length. One shape dimension can be -1. In this case, the value is inferred from the length of the array and remaining dimensions.
 * @returns {NdArray} a new view object if possible, a copy otherwise,
 */
-NdArray.prototype.reshape = function (shape) {
+NdArray.prototype.reshape = function(shape) {
   if (arguments.length === 0) {
     throw new errors.ValueError('function takes at least one argument (0 given)');
   }
@@ -251,11 +250,11 @@ NdArray.prototype.reshape = function (shape) {
   if (arguments.length > 1) {
     shape = [].slice.call(arguments);
   }
-  if (shape.filter(function (s) { return s === -1; }).length > 1) {
+  if (shape.filter(function(s) { return s === -1; }).length > 1) {
     throw new errors.ValueError('can only specify one unknown dimension');
   }
   var currentShapeSize = _.shapeSize(shape);
-  shape = shape.map(function (s) { return s === -1 ? -1 * this.size / currentShapeSize : s; }.bind(this));
+  shape = shape.map(function(s) { return s === -1 ? -1 * this.size / currentShapeSize : s; }.bind(this));
   if (this.size !== _.shapeSize(shape)) {
     throw new errors.ValueError('total size of new array must be unchanged');
   }
@@ -320,7 +319,7 @@ NdArray.prototype.reshape = function (shape) {
 * @param {...number} [axes]
 * @returns {NfdArray}
 */
-NdArray.prototype.transpose = function (axes) {
+NdArray.prototype.transpose = function(axes) {
   if (arguments.length === 0) {
     var d = this.ndim;
     axes = new Array(d);
@@ -339,7 +338,7 @@ NdArray.prototype.transpose = function (axes) {
 * @param {(Array|NdArray)} x
 * @returns {NdArray}
 */
-NdArray.prototype.dot = function (x) {
+NdArray.prototype.dot = function(x) {
   x = (x instanceof NdArray) ? x : createArray(x, this.dtype);
   var tShape = this.shape;
   var xShape = x.shape;
@@ -367,7 +366,7 @@ NdArray.prototype.dot = function (x) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.assign = function (x, copy) {
+NdArray.prototype.assign = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -389,7 +388,7 @@ NdArray.prototype.assign = function (x, copy) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.add = function (x, copy) {
+NdArray.prototype.add = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -411,7 +410,7 @@ NdArray.prototype.add = function (x, copy) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.subtract = function (x, copy) {
+NdArray.prototype.subtract = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -433,7 +432,7 @@ NdArray.prototype.subtract = function (x, copy) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.multiply = function (x, copy) {
+NdArray.prototype.multiply = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -456,7 +455,7 @@ NdArray.prototype.multiply = function (x, copy) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.divide = function (x, copy) {
+NdArray.prototype.divide = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -479,7 +478,7 @@ NdArray.prototype.divide = function (x, copy) {
 * @param {boolean} [copy=true] - set to false to modify the array rather than create a new one
 * @returns {NdArray}
 */
-NdArray.prototype.pow = function (x, copy) {
+NdArray.prototype.pow = function(x, copy) {
   if (arguments.length === 1) { copy = true; }
   var arr = copy ? this.clone() : this;
   if (_.isNumber(x)) {
@@ -498,7 +497,7 @@ NdArray.prototype.pow = function (x, copy) {
 * @param {boolean} [copy=true] - set to false to modify the array rather than create a new one
 * @returns {NdArray}
 */
-NdArray.prototype.exp = function (copy) {
+NdArray.prototype.exp = function(copy) {
   if (arguments.length === 0) { copy = true; }
   var arr = copy ? this.clone() : this;
   ops.expeq(arr.selection);
@@ -511,7 +510,7 @@ NdArray.prototype.exp = function (copy) {
 * @param {boolean} [copy=true] - set to false to modify the array rather than create a new one
 * @returns {NdArray}
 */
-NdArray.prototype.log = function (copy) {
+NdArray.prototype.log = function(copy) {
   if (arguments.length === 0) { copy = true; }
   var arr = copy ? this.clone() : this;
   ops.logeq(arr.selection);
@@ -524,7 +523,7 @@ NdArray.prototype.log = function (copy) {
 * @param {boolean} [copy=true] - set to false to modify the array rather than create a new one
 * @returns {NdArray}
 */
-NdArray.prototype.sqrt = function (copy) {
+NdArray.prototype.sqrt = function(copy) {
   if (arguments.length === 0) { copy = true; }
   var arr = copy ? this.clone() : this;
   ops.sqrteq(arr.selection);
@@ -536,7 +535,7 @@ NdArray.prototype.sqrt = function (copy) {
 *
 * @returns {Number}
 */
-NdArray.prototype.max = function () {
+NdArray.prototype.max = function() {
   if (this.selection.size === 0) {
     return null;
   }
@@ -548,7 +547,7 @@ NdArray.prototype.max = function () {
 *
 * @returns {Number}
 */
-NdArray.prototype.min = function () {
+NdArray.prototype.min = function() {
   if (this.selection.size === 0) {
     return null;
   }
@@ -560,7 +559,7 @@ NdArray.prototype.min = function () {
 *
 * @returns {number}
 */
-NdArray.prototype.sum = function () {
+NdArray.prototype.sum = function() {
   return ops.sum(this.selection);
 };
 
@@ -570,7 +569,7 @@ NdArray.prototype.sum = function () {
 * @param {object} {ddof:0}
 * @returns {number}
 */
-NdArray.prototype.std = function (options) {
+NdArray.prototype.std = function(options) {
   options = _.defaults(options, { 'ddof': 0 });
   var squares = this.clone();
   ops.powseq(squares.selection, 2);
@@ -586,7 +585,7 @@ NdArray.prototype.std = function (options) {
 *
 * @returns {number}
 */
-NdArray.prototype.mean = function () {
+NdArray.prototype.mean = function() {
   return ops.sum(this.selection) / _.shapeSize(this.shape);
 };
 
@@ -597,7 +596,7 @@ NdArray.prototype.mean = function () {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.mod = function (x, copy) {
+NdArray.prototype.mod = function(x, copy) {
   if (arguments.length === 1) {
     copy = true;
   }
@@ -618,11 +617,11 @@ NdArray.prototype.mod = function (x, copy) {
 *
 * @returns {Array}
 */
-NdArray.prototype.tolist = function () {
+NdArray.prototype.tolist = function() {
   return unpackArray(this.selection);
 };
 
-NdArray.prototype.valueOf = function () {
+NdArray.prototype.valueOf = function() {
   return this.tolist();
 };
 /**
@@ -630,7 +629,7 @@ NdArray.prototype.valueOf = function () {
 *
 * @returns {string}
 */
-NdArray.prototype.toString = function () {
+NdArray.prototype.toString = function() {
   var nChars = formatNumber(this.max()).length;
 
   var reg1 = /\]\,(\s*)\[/g;
@@ -640,7 +639,7 @@ NdArray.prototype.toString = function () {
   var reg2 = /\[\s+\[/g;
   var spacer2 = '[[';
 
-  function formatArray (k, v) {
+  function formatArray(k, v) {
     if (_.isString(v)) { return v; }
     if (_.isNumber(v)) {
       var s = formatNumber(v);
@@ -655,7 +654,7 @@ NdArray.prototype.toString = function () {
     } else {
       arr = v;
     }
-    return new Array(k + 1).join(' ') + '[' + arr.map(function (i, ii) {
+    return new Array(k + 1).join(' ') + '[' + arr.map(function(i, ii) {
       return formatArray(ii === 0 && k === 0 ? 1 : k + 1, i);
     }).join(',') + ']';
   }
@@ -686,7 +685,7 @@ NdArray.prototype.inspect = NdArray.prototype.toString;
 * Stringify object to JSON
 * @returns {*}
 */
-NdArray.prototype.toJSON = function () {
+NdArray.prototype.toJSON = function() {
   return JSON.stringify(this.tolist());
 };
 
@@ -695,7 +694,7 @@ NdArray.prototype.toJSON = function () {
 *
 * @returns {NdArray}
 */
-NdArray.prototype.clone = function () {
+NdArray.prototype.clone = function() {
   var s = this.selection;
   if (typeof s.data.slice === 'undefined') {
     return new NdArray(ndarray([].slice.apply(s.data), s.shape, s.stride, s.offset)); // for legacy browsers
@@ -708,7 +707,7 @@ NdArray.prototype.clone = function () {
 * @param {(Array|NdArray)} array
 * @returns {boolean}
 */
-NdArray.prototype.equal = function (array) {
+NdArray.prototype.equal = function(array) {
   array = createArray(array);
   if (this.size !== array.size || this.ndim !== array.ndim) {
     return false;
@@ -729,7 +728,7 @@ NdArray.prototype.equal = function (array) {
 * @param {boolean} [copy=true]
 * @returns {NdArray}
 */
-NdArray.prototype.round = function (copy) {
+NdArray.prototype.round = function(copy) {
   if (arguments.length === 0) {
     copy = true;
   }
@@ -743,13 +742,13 @@ NdArray.prototype.round = function (copy) {
 *
 * @returns {NdArray}
 */
-NdArray.prototype.negative = function () {
+NdArray.prototype.negative = function() {
   var c = this.clone();
   ops.neg(c.selection, this.selection);
   return c;
 };
 
-NdArray.prototype.diag = function () {
+NdArray.prototype.diag = function() {
   var d = this.ndim;
   if (d === 1) {
     // input is a vector => return a diagonal matrix
@@ -773,7 +772,7 @@ NdArray.prototype.diag = function () {
   return new NdArray(this.selection.data, [nshape], [nstride], this.selection.offset);
 };
 
-NdArray.prototype.iteraxis = function (axis, cb) {
+NdArray.prototype.iteraxis = function(axis, cb) {
   var shape = this.shape;
   if (axis === -1) {
     axis = shape.length - 1;
@@ -792,110 +791,6 @@ NdArray.prototype.iteraxis = function (axis, cb) {
   }
 };
 
-var doConjMuleq = cwise({
-  args: ['array', 'array', 'array', 'array'],
-  body: function (xi, yi, ui, vi) {
-    var a = ui;
-    var b = vi;
-    var c = xi;
-    var d = yi;
-    var k1 = c * (a + b);
-    xi = k1 - b * (c + d);
-    yi = k1 + a * (d - c);
-  }
-});
-
-var doConvolve3x3 = cwise({
-  args: [
-    'array', // c
-    'array', // xe
-    'scalar', // fa
-    'scalar', // fb
-    'scalar', // fc
-    'scalar', // fd
-    'scalar', // fe
-    'scalar', // ff
-    'scalar', // fg
-    'scalar', // fh
-    'scalar', // fi
-    {offset: [-1, -1], array: 1}, // xa
-    {offset: [-1, 0], array: 1}, // xb
-    {offset: [-1, 1], array: 1}, // xc
-    {offset: [0, -1], array: 1}, // xd
-    // {offset:[ 9,  0], array:1}, // useless since available already
-    {offset: [0, 1], array: 1}, // xf
-    {offset: [1, -1], array: 1}, // xg
-    {offset: [1, 0], array: 1}, // xh
-    {offset: [1, 1], array: 1} // xi
-  ],
-  body: function (c, xe, fa, fb, fc, fd, fe, ff, fg, fh, fi, xa, xb, xc, xd, xf, xg, xh, xi) {
-    c = xa * fi + xb * fh + xc * fg + xd * ff + xe * fe + xf * fd + xg * fc + xh * fb + xi * fa;
-  }
-});
-
-var doConvolve5x5 = cwise({
-  args: [
-    'index',
-    'array', // c
-    'array', // xm
-    'scalar', // fa
-    'scalar', // fb
-    'scalar', // fc
-    'scalar', // fd
-    'scalar', // fe
-    'scalar', // ff
-    'scalar', // fg
-    'scalar', // fh
-    'scalar', // fi
-    'scalar', // fj
-    'scalar', // fk
-    'scalar', // fl
-    'scalar', // fm
-    'scalar', // fn
-    'scalar', // fo
-    'scalar', // fp
-    'scalar', // fq
-    'scalar', // fr
-    'scalar', // fs
-    'scalar', // ft
-    'scalar', // fu
-    'scalar', // fv
-    'scalar', // fw
-    'scalar', // fx
-    'scalar', // fy
-    {offset: [-2, -2], array: 1}, // xa
-    {offset: [-2, -1], array: 1}, // xb
-    {offset: [-2, 0], array: 1}, // xc
-    {offset: [-2, 1], array: 1}, // xd
-    {offset: [-2, 2], array: 1}, // xe
-    {offset: [-1, -2], array: 1}, // xf
-    {offset: [-1, -1], array: 1}, // xg
-    {offset: [-1, 0], array: 1}, // xh
-    {offset: [-1, 1], array: 1}, // xi
-    {offset: [-1, 2], array: 1}, // xj
-    {offset: [0, -2], array: 1}, // xk
-    {offset: [0, -1], array: 1}, // xl
-    // {offset:[ 0,  0], array:1},
-    {offset: [0, 1], array: 1}, // xn
-    {offset: [0, 2], array: 1}, // xo
-    {offset: [1, -2], array: 1}, // xp
-    {offset: [1, -1], array: 1}, // xq
-    {offset: [1, 0], array: 1}, // xr
-    {offset: [1, 1], array: 1}, // xs
-    {offset: [1, 2], array: 1}, // xt
-    {offset: [2, -2], array: 1}, // xu
-    {offset: [2, -1], array: 1}, // xv
-    {offset: [2, 0], array: 1}, // xw
-    {offset: [2, 1], array: 1}, // xx
-    {offset: [2, 2], array: 1} // xy
-  ],
-  body: function (index, c, xm,
-    fa, fb, fc, fd, fe, ff, fg, fh, fi, fj, fk, fl, fm, fn, fo, fp, fq, fr, fs, ft, fu, fv, fw, fx, fy,
-    xa, xb, xc, xd, xe, xf, xg, xh, xi, xj, xk, xl, xn, xo, xp, xq, xr, xs, xt, xu, xv, xw, xx, xy) {
-    c = (index[0] < 2 || index[1] < 2) ? 0 : xa * fy + xb * fx + xc * fw + xd * fv + xe * fu + xf * ft + xg * fs + xh * fr + xi * fq + xj * fp + xk * fo + xl * fn + xm * fm + xn * fl + xo * fk + xp * fj + xq * fi + xr * fh + xs * fg + xt * ff + xu * fe + xv * fd + xw * fc + xx * fb + xy * fa;
-  }
-});
-
 /**
 * Returns the discrete, linear convolution of the array using the given filter.
 *
@@ -905,7 +800,7 @@ var doConvolve5x5 = cwise({
 *
 * @param {Array|NdArray} filter
 */
-NdArray.prototype.convolve = function (filter) {
+NdArray.prototype.convolve = function(filter) {
   filter = NdArray.new(filter);
   var ndim = this.ndim;
   if (ndim !== filter.ndim) {
@@ -1028,7 +923,7 @@ NdArray.prototype.convolve = function (filter) {
   }
 };
 
-NdArray.prototype.fftconvolve = function (filter) {
+NdArray.prototype.fftconvolve = function(filter) {
   filter = NdArray.new(filter);
 
   if (this.ndim !== filter.ndim) {
@@ -1107,7 +1002,7 @@ NdArray.prototype.fftconvolve = function (filter) {
   return out;
 };
 
-function createArray (arr, dtype) {
+function createArray(arr, dtype) {
   if (arr instanceof NdArray) { return arr; }
   var T = _.getType(dtype);
   if (_.isNumber(arr)) {
@@ -1131,7 +1026,7 @@ NdArray.new = createArray;
 module.exports = NdArray;
 
 /*     utils    */
-function initNativeArray (shape, i) {
+function initNativeArray(shape, i) {
   i = i || 0;
   var c = shape[i] | 0;
   if (c <= 0) { return []; }
@@ -1149,24 +1044,6 @@ function initNativeArray (shape, i) {
   return result;
 }
 
-var doUnpack = cwise({
-  args: ['array', 'scalar', 'index'],
-  body: function unpackCwise (arr, a, idx) {
-    var v = a;
-    var i;
-    for (i = 0; i < idx.length - 1; ++i) {
-      v = v[idx[i]];
-    }
-    v[idx[idx.length - 1]] = arr;
-  }
-});
-
-function unpackArray (arr) {
-  var result = initNativeArray(arr.shape, 0);
-  doUnpack(arr, result);
-  return result;
-}
-
-function formatNumber (v) {
+function formatNumber(v) {
   return String(Number((v || 0).toFixed(CONF.nFloatingValues)));
 }
